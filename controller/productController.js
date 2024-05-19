@@ -15,8 +15,13 @@ exports.fetchAllProducts = async (req, res) => {
   //? sortby = {"sort": "price"}
   //? Pagination = {"page" : 1 , "limit": 10}
   console.log(req);
-  let query = Product.find({});
-  let totalProductQuery = Product.find({});
+  let roleCondition = {};
+  if (!req.query.admin) {
+    roleCondition.deleted = { $ne: true };
+  }
+  console.log(roleCondition);
+  let query = Product.find(roleCondition);
+  let totalProductQuery = Product.find(roleCondition);
 
   if (req.query.category) {
     query = query.find({ category: req.query.category });
@@ -71,6 +76,7 @@ exports.updateProduct = async (req, res) => {
     });
     res.status(200).json(updateProduct);
   } catch (error) {
+    console.log(error);
     res.status(400).json(error);
   }
 };

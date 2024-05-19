@@ -31,8 +31,7 @@ const productSchema = new Schema({
   stock: {
     type: Number,
     required: true,
-    min: [1, "Minimum stock count should be 1"],
-    max: [100, "Max stock count reached"],
+    min: [0, "Stock should not be empty"],
     default: 0,
   },
 });
