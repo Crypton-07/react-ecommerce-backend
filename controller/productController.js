@@ -1,7 +1,7 @@
-const { product } = require("../models/product");
+const { Product } = require("../models/product");
 
 exports.createProduct = async (req, res) => {
-  const createProduct = new product(req.body);
+  const createProduct = new Product(req.body);
   try {
     const doc = await createProduct.save();
     res.status(201).json(doc);
@@ -15,8 +15,8 @@ exports.fetchAllProducts = async (req, res) => {
   //? sortby = {"sort": "price"}
   //? Pagination = {"page" : 1 , "limit": 10}
   console.log(req);
-  let query = product.find({});
-  let totalProductQuery = product.find({});
+  let query = Product.find({});
+  let totalProductQuery = Product.find({});
 
   if (req.query.category) {
     query = query.find({ category: req.query.category });
@@ -56,8 +56,8 @@ exports.fetchAllProducts = async (req, res) => {
 exports.fetchProductById = async (req, res) => {
   const { id } = req.params;
   try {
-    const fetchPproductById = await product.findById(id);
-    res.status(200).json(fetchPproductById);
+    const fetchProductById = await Product.findById(id);
+    res.status(200).json(fetchProductById);
   } catch (error) {
     res.status(400).json(error);
   }
@@ -66,7 +66,7 @@ exports.fetchProductById = async (req, res) => {
 exports.updateProduct = async (req, res) => {
   const { id } = req.params;
   try {
-    const updateProduct = await product.findByIdAndUpdate(id, req.body, {
+    const updateProduct = await Product.findByIdAndUpdate(id, req.body, {
       new: true,
     });
     res.status(200).json(updateProduct);
