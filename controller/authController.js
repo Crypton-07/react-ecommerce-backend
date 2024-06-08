@@ -1,33 +1,60 @@
 const { User } = require("../models/user");
+const crypto = require("crypto");
+const jwt = require("jsonwebtoken");
+const { sanetizeUser } = require("../services/common");
+const SECRET_KEY = "SECRET_KEY";
 
 exports.createUser = async (req, res) => {
-  const newUser = new User(req.body);
   try {
-    const doc = await newUser.save();
-    res.status(201).json({ id: doc?.id, email: doc?.email, role: doc?.role });
+    const salt = crypto.randomBytes(16);
+    crypto.pbkdf2(
+      req.body.password,
+      salt,
+      310000,
+      32,
+      "sha256",
+      async function (err, hashedPassword) {
+        const newUser = new User({
+          ...req.body,
+          password: hashedPassword,
+          salt,
+        });
+        const doc = await newUser.save();
+        req.login(sanetizeUser(doc), (err) => {
+          if (err) {
+            res.status(400).json(err);
+          } else {
+            const token = jwt.sign(sanetizeUser(doc), SECRET_KEY);
+            res
+              .cookie("jwt", token, {
+                expires: new Date(Date.now() + 3600000),
+                httpOnly: true,
+              })
+              .status(201)
+              .json({ id: doc.id, role: doc.role });
+          }
+        });
+      }
+    );
   } catch (error) {
     res.status(400).json(error);
   }
 };
 
 exports.loginUser = async (req, res) => {
-  try {
-    const findUser = await User.findOne({ email: req.body.email }).exec();
-    if (!findUser) {
-      res.status(400).json({ message: "User not found" });
-    } else if (
-      findUser?.password === req.body.password &&
-      findUser?.email === req.body.email
-    ) {
-      res.status(200).json({
-        id: findUser.id,
-        email: findUser.email,
-        role: findUser.role,
-      });
-    } else {
-      res.status(400).json({ message: "Invalid credentials" });
-    }
-  } catch (error) {
-    res.status(400).json(error);
+  res
+    .cookie("jwt", req.user.token, {
+      expires: new Date(Date.now() + 3600000),
+      httpOnly: true,
+    })
+    .status(201)
+    .json(req.user.token);
+  // res.json(req.user);
+};
+exports.checkAuth = async (req, res) => {
+  if (req.user) {
+    res.json(req.user);
+  } else {
+    res.sendStatus(401);
   }
 };

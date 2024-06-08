@@ -10,10 +10,9 @@ exports.createOrder = async (req, res) => {
   }
 };
 exports.fetchOrderByUser = async (req, res) => {
-  const { userId } = req.params;
-  console.log(userId);
+  const { id } = req.user;
   try {
-    const fetchOrder = await Order.find({ user: userId });
+    const fetchOrder = await Order.find({ user: id });
     console.log(fetchOrder);
     res.status(200).json(fetchOrder);
   } catch (error) {

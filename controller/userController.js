@@ -10,13 +10,17 @@ exports.fetchAllUsers = async (req, res) => {
 };
 
 exports.fetchUserById = async (req, res) => {
-  const { id } = req.params;
+  const { id } = req.user;
   try {
-    const fetchUserById = await User.findById(
-      id,
-      "name email id address role"
-    ).exec();
-    res.status(200).json(fetchUserById);
+    const fetchUserById = await User.findById(id);
+    res.status(200).json({
+      id: fetchUserById.id,
+      name: fetchUserById.name,
+      email: fetchUserById.email,
+      address: fetchUserById.address,
+      role: fetchUserById.role,
+      orders: fetchUserById.orders,
+    });
   } catch (error) {
     res.status(400).json(error);
   }
