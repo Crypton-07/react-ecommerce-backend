@@ -12,7 +12,7 @@ exports.createOrder = async (req, res) => {
 exports.fetchOrderByUser = async (req, res) => {
   const { id } = req.user;
   try {
-    const fetchOrder = await Order.find({ user: id });
+    const fetchOrder = await Order.find({ user: id }).sort({ $natural: -1 });
     console.log(fetchOrder);
     res.status(200).json(fetchOrder);
   } catch (error) {
